@@ -1,0 +1,318 @@
+basePath: /
+definitions:
+  models.Subscription:
+    properties:
+      end_date:
+        description: Формат "MM-YYYY"
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        description: Формат "MM-YYYY"
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.SubscriptionRequest:
+    properties:
+      end_date:
+        description: Формат "MM-YYYY"
+        type: string
+      price:
+        minimum: 0
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        description: Формат "MM-YYYY"
+        type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    type: object
+  models.TotalCostResponse:
+    properties:
+      total_cost:
+        type: integer
+    type: object
+host: localhost:8081
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: Это микросервис для управления подписками пользователей.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Subscription Service API
+  version: "1.0"
+paths:
+  /subscriptions:
+    get:
+      description: Get a list of subscriptions with optional filtering by user ID
+        and/or service name.
+      parameters:
+      - description: Filter by User UUID
+        format: uuid
+        in: query
+        name: user_id
+        type: string
+      - description: Filter by Service Name
+        in: query
+        name: service_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Subscription'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List subscriptions
+      tags:
+      - subscriptions
+  /subscriptions/{user_id}/{service_name}:
+    delete:
+      description: Delete a specific subscription by user ID and service name.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a subscription
+      tags:
+      - subscriptions
+    get:
+      description: Get a specific subscription by user ID and service name.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a subscription
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Create a new subscription for a user. Dates must be in MM-YYYY
+        format.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      - description: Subscription Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new subscription
+      tags:
+      - subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Update an existing subscription for a user. Dates must be in MM-YYYY
+        format.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      - description: Subscription Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a subscription
+      tags:
+      - subscriptions
+  /subscriptions/total:
+    get:
+      description: Calculates the total cost of active subscriptions for a given period
+        (inclusive). Optionally filtered by user and service. Dates must be in MM-YYYY
+        format.
+      parameters:
+      - description: Filter by User UUID
+        format: uuid
+        in: query
+        name: user_id
+        type: string
+      - description: Filter by Service Name
+        in: query
+        name: service_name
+        type: string
+      - description: Start Period (MM-YYYY)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End Period (MM-YYYY)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TotalCostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Calculate total cost
+      tags:
+      - analytics
+schemes:
+- http
+swagger: "2.0"
